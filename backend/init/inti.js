@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import holdings from "../model/holdings.js";
 import positions from "../model/positions.js";
-import watchlist from "../model/watchlist.js";
+import order from "../model/orderlist.js";
 import dotenv from "dotenv"
 dotenv.config();
 const insert=async()=>{
@@ -147,7 +147,7 @@ const insert=async()=>{
     await positions.insertMany(position_data);
     console.log("position inserted");
                         
-    const watchlist_data = [
+    const order_data = [
       {
         name: "INFY",
         price: 1555.45,
@@ -203,8 +203,8 @@ const insert=async()=>{
         isDown: false,
       },
     ];
-    await watchlist.deleteMany({});
-    await watchlist.insertMany(watchlist_data);
+    await order.deleteMany({});
+    await order.insertMany(order_data);
     console.log("saab sahi hogaya");
     }
     catch(err){
@@ -213,7 +213,7 @@ const insert=async()=>{
 }
 const main=async ()=>{
     try{
-        await mongoose.connect("mongodb+srv://bhargavmane18_db_user:3388Mane%40@zerodha.qpc1fdf.mongodb.net/?appName=Zerodha");
+        await mongoose.connect(process.env.MONGO_URL);
         insert();
     }
     catch(err){

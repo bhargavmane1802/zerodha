@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect,useContext} from "react";
 import { Link } from "react-router-dom";
 
 import axios from "axios";
@@ -7,23 +7,39 @@ import GeneralContext from "./GeneralContext";
 
 import "./BuyActionWindow.css";
 
-const BuyActionWindow = ({ uid }) => {
-  const [stockQuantity, setStockQuantity] = useState(1);
-  const [stockPrice, setStockPrice] = useState(0.0);
+const BuyActionWindow = ({ uid ,mode}) => {
+  const { closeBuyWindow } = useContext(GeneralContext);
+  const [stockQuantity, setStockQuantity] = useState(0);
+  const [currPrice,setCurrPrice]=useState(0.0);
+  const [stockPrice, setStockPrice] = useState(currPrice);
+  const [selectedMode,setMode]=useState("");
 
-  const handleBuyClick = () => {
-    axios.post("http://localhost:3002/newOrder", {
-      name: uid,
-      qty: stockQuantity,
-      price: stockPrice,
-      mode: "BUY",
-    });
-
-    GeneralContext.closeBuyWindow();
+  useEffect(() => {
+      axios.get(`http://localhost:3002/order/${uid}`).then((res) => {
+        setMode(mode);
+        const price = res.data[0].price;
+        setCurrPrice(price);
+      });
+    }, []);
+  const handleBuyClick = async () => {
+    try{
+      axios.post("http://localhost:3002/buyorder", {
+        name: uid,
+        qty: Number(stockQuantity),
+        price: Number (stockPrice),
+        mode: String(selectedMode),
+      }).then(()=>{
+      console.log("done");
+    })
+    }
+    catch(e){
+      console.log("unable to send");
+    }
+    closeBuyWindow();
   };
 
   const handleCancelClick = () => {
-    GeneralContext.closeBuyWindow();
+    closeBuyWindow();
   };
 
   return (
@@ -36,7 +52,10 @@ const BuyActionWindow = ({ uid }) => {
               type="number"
               name="qty"
               id="qty"
-              onChange={(e) => setStockQuantity(e.target.value)}
+              onChange={(e) => {
+                setStockQuantity(e.target.value);
+                setStockPrice(e.target.value * currPrice);
+              }}
               value={stockQuantity}
             />
           </fieldset>
@@ -47,7 +66,10 @@ const BuyActionWindow = ({ uid }) => {
               name="price"
               id="price"
               step="0.05"
-              onChange={(e) => setStockPrice(e.target.value)}
+              onChange={(e) => {
+                setStockPrice(e.target.value);
+                setStockQuantity(e.target.value/currPrice);
+              }}
               value={stockPrice}
             />
           </fieldset>

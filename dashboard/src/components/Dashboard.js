@@ -25,6 +25,7 @@ const Dashboard = () => {
           <Route path="/positions" element={<Positions />} />
           <Route path="/funds" element={<Funds />} />
           <Route path="/apps" element={<Apps />} />
+          <Route path="/error" element={<Summary />} />
         </Routes>
       </div>
     </div>

@@ -3,15 +3,36 @@ import axios, { all } from "axios";
 import { VerticalGraph } from "./VerticalGraph";
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
-
+  const [totalInvestment,setTotalInvestment]=useState(0);
+  const[currValue,setCurrValue]= useState(0);
+  const [currReturn,setCurrReturn]=useState(0);
+  const [color,setColor]=useState("green");
   useEffect(() => {
     axios.get("http://localhost:3002/allHoldings").then((res) => {
-      console.log(res.data);
-      setAllHoldings(res.data);
+      setAllHoldings(res.data.data);
+      setCurrValue(res.data.return);
     });
   }, []);
 
   const labels = allHoldings.map((subArray) => subArray["name"]);
+  
+  useEffect(() => {
+  const total = allHoldings.reduce(
+    (sum, s) => sum + s.price * s.qty,
+    0
+  );
+  setTotalInvestment(total);
+}, [allHoldings]);
+
+useEffect(() => {
+  setCurrReturn(currValue - totalInvestment);
+  if(currReturn>=0){
+    setColor("green");
+  }
+  else{
+    setColor("red");
+  }
+}, [currValue, totalInvestment]);
 
   const data = {
     labels,
@@ -23,6 +44,7 @@ const Holdings = () => {
       },
     ],
   };
+
 
   return (
     <>
@@ -68,18 +90,18 @@ const Holdings = () => {
       <div className="row">
         <div className="col">
           <h5>
-            29,875.<span>55</span>{" "}
+            {Math.ceil(totalInvestment * 100) / 100}<span>{allHoldings.length}</span>{" "}
           </h5>
           <p>Total investment</p>
         </div>
         <div className="col">
           <h5>
-            31,428.<span>95</span>{" "}
+            {currValue}<span></span>{" "}
           </h5>
           <p>Current value</p>
         </div>
-        <div className="col">
-          <h5>1,553.40 (+5.20%)</h5>
+        <div className="col"> 
+          <h5 style={{color:"red"}}>{Math.ceil(currReturn * 100) / 100} {Math.ceil(((currReturn/totalInvestment)*100) * 100) / 100} %</h5>
           <p>P&L</p>
         </div>
       </div>
